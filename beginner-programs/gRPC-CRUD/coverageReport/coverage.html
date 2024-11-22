@@ -1,0 +1,1534 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>client: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/client/client.go (0.0%)</option>
+				
+				<option value="file1">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/client/cmd/create.go (44.4%)</option>
+				
+				<option value="file2">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/client/cmd/delete.go (30.8%)</option>
+				
+				<option value="file3">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/client/cmd/read.go (30.8%)</option>
+				
+				<option value="file4">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/client/cmd/root.go (40.9%)</option>
+				
+				<option value="file5">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/client/cmd/update.go (50.0%)</option>
+				
+				<option value="file6">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/pb/blog.pb.go (3.1%)</option>
+				
+				<option value="file7">github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/server/server.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/client/cmd"
+)
+
+func main() <span class="cov0" title="0">{
+        cmd.Execute()
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package cmd
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/spf13/cobra"
+        "github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/pb"
+        "google.golang.org/grpc"
+)
+
+type createBlogCmdParams struct {
+        ID       *string
+        Title    *string
+        AuthorID *string
+        Content  *string
+}
+
+var createBlogParams *createBlogCmdParams
+
+func init() <span class="cov8" title="1">{
+        createBlogParams = &amp;createBlogCmdParams{}
+
+        createBlogParams.Title = createCmd.Flags().StringP("title", "t", "", "Title of the blog post")
+        createCmd.MarkFlagRequired("title")
+
+        createBlogParams.AuthorID = createCmd.Flags().StringP("authorid", "i", "", "Id of the blog post author")
+        createCmd.MarkFlagRequired("authorid")
+
+        createBlogParams.Content = createCmd.Flags().StringP("content", "c", "", "Blog post content")
+        createCmd.MarkFlagRequired("content")
+
+        rootCmd.AddCommand(createCmd)
+}</span>
+
+var createCmd = &amp;cobra.Command{
+        Use:   "create",
+        Short: "Creating a new Blog post in the database",
+        Long:  `Creating a new Blog post in the database`,
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                s, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+
+                if err != nil </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+
+                <span class="cov0" title="0">defer s.Close()
+
+                c := pb.NewBlogServiceClient(s)
+
+                request := &amp;pb.Blog{
+                        AuthorId: *createBlogParams.AuthorID,
+                        Title:    *createBlogParams.Title,
+                        Content:  *createBlogParams.Content,
+                }
+
+                createdBlog, err := c.CreateBlog(context.Background(), &amp;pb.CreateBlogRequest{
+                        Blog: request,
+                })
+
+                if err != nil </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+
+                <span class="cov0" title="0">fmt.Printf("Blog has been created: %v", createdBlog.Blog)</span>
+        },
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package cmd
+
+import (
+        "context"
+        "fmt"
+        "log"
+
+        "github.com/spf13/cobra"
+        "github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/pb"
+        "google.golang.org/grpc"
+)
+
+type deleteBlogCmdParams struct {
+        BlogID *string
+}
+
+var deleteBlogParams *deleteBlogCmdParams
+
+func init() <span class="cov8" title="1">{
+        deleteBlogParams = &amp;deleteBlogCmdParams{}
+
+        deleteBlogParams.BlogID = deleteCmd.Flags().StringP("blogid", "r", "", "Id of the blog post you want to read")
+        deleteCmd.MarkFlagRequired("blogid")
+
+        rootCmd.AddCommand(deleteCmd)
+}</span>
+
+var deleteCmd = &amp;cobra.Command{
+        Use:   "delete",
+        Short: "Delete a blog post from the database",
+        Long:  `Delete a blog post from the database`,
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                s, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+
+                if err != nil </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+
+                <span class="cov0" title="0">defer s.Close()
+
+                c := pb.NewBlogServiceClient(s)
+
+                deleteResponse, err := c.DeleteBlog(context.Background(), &amp;pb.DeleteBlogRequest{
+                        BlogId: *deleteBlogParams.BlogID,
+                })
+
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatalf("something went wrong: %v", err)
+                }</span>
+
+                <span class="cov0" title="0">fmt.Println(deleteResponse.Status)</span>
+        },
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package cmd
+
+import (
+        "context"
+        "fmt"
+        "log"
+
+        "github.com/spf13/cobra"
+        "github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/pb"
+        "google.golang.org/grpc"
+)
+
+type readBlogCmdParams struct {
+        BlogID *string
+}
+
+var readBlogParams *readBlogCmdParams
+
+func init() <span class="cov8" title="1">{
+        readBlogParams = &amp;readBlogCmdParams{}
+
+        readBlogParams.BlogID = readCmd.Flags().StringP("blogid", "r", "", "Id of the blog post you want to read")
+        readCmd.MarkFlagRequired("blogid")
+
+        rootCmd.AddCommand(readCmd)
+}</span>
+
+var readCmd = &amp;cobra.Command{
+        Use:   "read",
+        Short: "Reading a blog post from the database",
+        Long:  `Reading a blog post from the database`,
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                s, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+
+                if err != nil </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+
+                <span class="cov0" title="0">defer s.Close()
+
+                c := pb.NewBlogServiceClient(s)
+
+                blog, err := c.ReadBlog(context.Background(), &amp;pb.ReadBlogRequest{
+                        BlogId: *readBlogParams.BlogID,
+                })
+
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatalf("something went wrong: %v", err)
+                }</span>
+
+                <span class="cov0" title="0">fmt.Println(blog.Blog)</span>
+        },
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package cmd
+
+import (
+        "fmt"
+        "os"
+
+        homedir "github.com/mitchellh/go-homedir"
+        "github.com/spf13/cobra"
+        "github.com/spf13/viper"
+)
+
+var (
+        // Used for flags.
+        cfgFile     string
+        userLicense string
+
+        rootCmd = &amp;cobra.Command{
+                Use:   "grpc-crud",
+                Short: "A command line application for manipulation a MongoDB Database using GRPC",
+                Long:  `A command line application for manipulation a MongoDB Database using GRPC`,
+        }
+)
+
+// Execute executes the root command.
+func Execute() error <span class="cov0" title="0">{
+        return rootCmd.Execute()
+}</span>
+
+func init() <span class="cov8" title="1">{
+        cobra.OnInitialize(initConfig)
+
+        rootCmd.PersistentFlags().StringVar(&amp;cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
+        rootCmd.PersistentFlags().StringP("author", "a", "Gabriel Tanner", "author name for copyright attribution")
+        rootCmd.PersistentFlags().StringVarP(&amp;userLicense, "license", "l", "", "name of license for the project")
+        rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
+        viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
+        viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
+        viper.SetDefault("author", "NAME HERE &lt;EMAIL ADDRESS&gt;")
+        viper.SetDefault("license", "apache")
+}</span>
+
+func er(msg interface{}) <span class="cov0" title="0">{
+        fmt.Println("Error:", msg)
+        os.Exit(1)
+}</span>
+
+func initConfig() <span class="cov0" title="0">{
+        if cfgFile != "" </span><span class="cov0" title="0">{
+                // Use config file from the flag.
+                viper.SetConfigFile(cfgFile)
+        }</span> else<span class="cov0" title="0"> {
+                // Find home directory.
+                home, err := homedir.Dir()
+                if err != nil </span><span class="cov0" title="0">{
+                        er(err)
+                }</span>
+
+                // Search config in home directory with name ".cobra" (without extension).
+                <span class="cov0" title="0">viper.AddConfigPath(home)
+                viper.SetConfigName(".cobra")</span>
+        }
+
+        <span class="cov0" title="0">viper.AutomaticEnv()
+
+        if err := viper.ReadInConfig(); err == nil </span><span class="cov0" title="0">{
+                fmt.Println("Using config file:", viper.ConfigFileUsed())
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package cmd
+
+import (
+        "context"
+        "fmt"
+        "log"
+
+        "github.com/spf13/cobra"
+        "github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/pb"
+        "google.golang.org/grpc"
+)
+
+type updateBlogCmdParams struct {
+        BlogID   *string
+        Title    *string
+        AuthorID *string
+        Content  *string
+}
+
+var updateBlogParams *updateBlogCmdParams
+
+func init() <span class="cov8" title="1">{
+        updateBlogParams = &amp;updateBlogCmdParams{}
+
+        updateBlogParams.BlogID = updateCmd.Flags().StringP("id", "", "", "Blog post id")
+        updateCmd.MarkFlagRequired("id")
+
+        updateBlogParams.Title = updateCmd.Flags().StringP("title", "t", "", "Title of the blog post")
+        updateCmd.MarkFlagRequired("title")
+
+        updateBlogParams.AuthorID = updateCmd.Flags().StringP("authorid", "i", "", "Id of the blog post author")
+        updateCmd.MarkFlagRequired("authorid")
+
+        updateBlogParams.Content = updateCmd.Flags().StringP("content", "c", "", "Blog post content")
+        updateCmd.MarkFlagRequired("content")
+
+        rootCmd.AddCommand(updateCmd)
+}</span>
+
+var updateCmd = &amp;cobra.Command{
+        Use:   "update",
+        Short: "Update an already existing Blog post in the database",
+        Long:  `Update an already existing Blog post in the database`,
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                s, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+
+                if err != nil </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+
+                <span class="cov0" title="0">defer s.Close()
+
+                c := pb.NewBlogServiceClient(s)
+
+                updateRequest := &amp;pb.UpdateBlogRequest{
+                        BlogId: *updateBlogParams.BlogID,
+                        Blog: &amp;pb.Blog{
+                                AuthorId: *updateBlogParams.AuthorID,
+                                Title:    *updateBlogParams.Title,
+                                Content:  *updateBlogParams.Content,
+                        },
+                }
+
+                updatedBlog, err := c.UpdateBlog(context.Background(), updateRequest)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Fatalf("something went wrong: %v", err)
+                }</span>
+
+                <span class="cov0" title="0">fmt.Println(updatedBlog.Blog)</span>
+        },
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">// Code generated by protoc-gen-go. DO NOT EDIT.
+// versions:
+//         protoc-gen-go v1.23.0-devel
+//         protoc        v3.12.0
+// source: blog.proto
+
+package pb
+
+import (
+        context "context"
+        proto "github.com/golang/protobuf/proto"
+        grpc "google.golang.org/grpc"
+        codes "google.golang.org/grpc/codes"
+        status "google.golang.org/grpc/status"
+        protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+        protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+        reflect "reflect"
+        sync "sync"
+)
+
+const (
+        // Verify that this generated code is sufficiently up-to-date.
+        _ = protoimpl.EnforceVersion(20 - protoimpl.MinVersion)
+        // Verify that runtime/protoimpl is sufficiently up-to-date.
+        _ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
+)
+
+// This is a compile-time assertion that a sufficiently up-to-date version
+// of the legacy proto package is being used.
+const _ = proto.ProtoPackageIsVersion4
+
+type Blog struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        Id       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+        AuthorId string `protobuf:"bytes,2,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+        Title    string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+        Content  string `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+}
+
+func (x *Blog) Reset() <span class="cov0" title="0">{
+        *x = Blog{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[0]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *Blog) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*Blog) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *Blog) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[0]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use Blog.ProtoReflect.Descriptor instead.
+func (*Blog) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{0}
+}</span>
+
+func (x *Blog) GetId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Id
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Blog) GetAuthorId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.AuthorId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Blog) GetTitle() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Title
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Blog) GetContent() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Content
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type CreateBlogRequest struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        Blog *Blog `protobuf:"bytes,1,opt,name=blog,proto3" json:"blog,omitempty"`
+}
+
+func (x *CreateBlogRequest) Reset() <span class="cov0" title="0">{
+        *x = CreateBlogRequest{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[1]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *CreateBlogRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*CreateBlogRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *CreateBlogRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[1]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use CreateBlogRequest.ProtoReflect.Descriptor instead.
+func (*CreateBlogRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{1}
+}</span>
+
+func (x *CreateBlogRequest) GetBlog() *Blog <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Blog
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+type CreateBlogResponse struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        Blog *Blog `protobuf:"bytes,1,opt,name=blog,proto3" json:"blog,omitempty"`
+}
+
+func (x *CreateBlogResponse) Reset() <span class="cov0" title="0">{
+        *x = CreateBlogResponse{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[2]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *CreateBlogResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*CreateBlogResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *CreateBlogResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[2]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use CreateBlogResponse.ProtoReflect.Descriptor instead.
+func (*CreateBlogResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{2}
+}</span>
+
+func (x *CreateBlogResponse) GetBlog() *Blog <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Blog
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+type ReadBlogRequest struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        BlogId string `protobuf:"bytes,1,opt,name=blog_id,json=blogId,proto3" json:"blog_id,omitempty"`
+}
+
+func (x *ReadBlogRequest) Reset() <span class="cov0" title="0">{
+        *x = ReadBlogRequest{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[3]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *ReadBlogRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*ReadBlogRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *ReadBlogRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[3]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use ReadBlogRequest.ProtoReflect.Descriptor instead.
+func (*ReadBlogRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{3}
+}</span>
+
+func (x *ReadBlogRequest) GetBlogId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.BlogId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type ReadBlogResponse struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        Blog *Blog `protobuf:"bytes,1,opt,name=blog,proto3" json:"blog,omitempty"`
+}
+
+func (x *ReadBlogResponse) Reset() <span class="cov0" title="0">{
+        *x = ReadBlogResponse{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[4]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *ReadBlogResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*ReadBlogResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *ReadBlogResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[4]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use ReadBlogResponse.ProtoReflect.Descriptor instead.
+func (*ReadBlogResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{4}
+}</span>
+
+func (x *ReadBlogResponse) GetBlog() *Blog <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Blog
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+type UpdateBlogRequest struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        BlogId string `protobuf:"bytes,1,opt,name=blog_id,json=blogId,proto3" json:"blog_id,omitempty"`
+        Blog   *Blog  `protobuf:"bytes,2,opt,name=blog,proto3" json:"blog,omitempty"`
+}
+
+func (x *UpdateBlogRequest) Reset() <span class="cov0" title="0">{
+        *x = UpdateBlogRequest{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[5]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *UpdateBlogRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*UpdateBlogRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *UpdateBlogRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[5]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use UpdateBlogRequest.ProtoReflect.Descriptor instead.
+func (*UpdateBlogRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{5}
+}</span>
+
+func (x *UpdateBlogRequest) GetBlogId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.BlogId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *UpdateBlogRequest) GetBlog() *Blog <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Blog
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+type UpdateBlogResponse struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        Blog *Blog `protobuf:"bytes,1,opt,name=blog,proto3" json:"blog,omitempty"`
+}
+
+func (x *UpdateBlogResponse) Reset() <span class="cov0" title="0">{
+        *x = UpdateBlogResponse{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[6]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *UpdateBlogResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*UpdateBlogResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *UpdateBlogResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[6]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use UpdateBlogResponse.ProtoReflect.Descriptor instead.
+func (*UpdateBlogResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{6}
+}</span>
+
+func (x *UpdateBlogResponse) GetBlog() *Blog <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Blog
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+type DeleteBlogRequest struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        BlogId string `protobuf:"bytes,1,opt,name=blog_id,json=blogId,proto3" json:"blog_id,omitempty"`
+}
+
+func (x *DeleteBlogRequest) Reset() <span class="cov0" title="0">{
+        *x = DeleteBlogRequest{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[7]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *DeleteBlogRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*DeleteBlogRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *DeleteBlogRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[7]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use DeleteBlogRequest.ProtoReflect.Descriptor instead.
+func (*DeleteBlogRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{7}
+}</span>
+
+func (x *DeleteBlogRequest) GetBlogId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.BlogId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type DeleteBlogResponse struct {
+        state         protoimpl.MessageState
+        sizeCache     protoimpl.SizeCache
+        unknownFields protoimpl.UnknownFields
+
+        Status bool `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
+}
+
+func (x *DeleteBlogResponse) Reset() <span class="cov0" title="0">{
+        *x = DeleteBlogResponse{}
+        if protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                mi := &amp;file_blog_proto_msgTypes[8]
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                ms.StoreMessageInfo(mi)
+        }</span>
+}
+
+func (x *DeleteBlogResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*DeleteBlogResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *DeleteBlogResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_blog_proto_msgTypes[8]
+        if protoimpl.UnsafeEnabled &amp;&amp; x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use DeleteBlogResponse.ProtoReflect.Descriptor instead.
+func (*DeleteBlogResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_blog_proto_rawDescGZIP(), []int{8}
+}</span>
+
+func (x *DeleteBlogResponse) GetStatus() bool <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Status
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+var File_blog_proto protoreflect.FileDescriptor
+
+var file_blog_proto_rawDesc = []byte{
+        0x0a, 0x0a, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04, 0x62, 0x6c,
+        0x6f, 0x67, 0x22, 0x63, 0x0a, 0x04, 0x42, 0x6c, 0x6f, 0x67, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+        0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x61, 0x75,
+        0x74, 0x68, 0x6f, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x61,
+        0x75, 0x74, 0x68, 0x6f, 0x72, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65,
+        0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x12, 0x18, 0x0a,
+        0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
+        0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x33, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74,
+        0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x04,
+        0x62, 0x6c, 0x6f, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x62, 0x6c, 0x6f,
+        0x67, 0x2e, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x04, 0x62, 0x6c, 0x6f, 0x67, 0x22, 0x34, 0x0a, 0x12,
+        0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+        0x73, 0x65, 0x12, 0x1e, 0x0a, 0x04, 0x62, 0x6c, 0x6f, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+        0x32, 0x0a, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x04, 0x62, 0x6c,
+        0x6f, 0x67, 0x22, 0x2a, 0x0a, 0x0f, 0x52, 0x65, 0x61, 0x64, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65,
+        0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x62, 0x6c, 0x6f, 0x67, 0x5f, 0x69, 0x64,
+        0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x62, 0x6c, 0x6f, 0x67, 0x49, 0x64, 0x22, 0x32,
+        0x0a, 0x10, 0x52, 0x65, 0x61, 0x64, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+        0x73, 0x65, 0x12, 0x1e, 0x0a, 0x04, 0x62, 0x6c, 0x6f, 0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+        0x32, 0x0a, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x04, 0x62, 0x6c,
+        0x6f, 0x67, 0x22, 0x4c, 0x0a, 0x11, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67,
+        0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x62, 0x6c, 0x6f, 0x67, 0x5f,
+        0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x62, 0x6c, 0x6f, 0x67, 0x49, 0x64,
+        0x12, 0x1e, 0x0a, 0x04, 0x62, 0x6c, 0x6f, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a,
+        0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x04, 0x62, 0x6c, 0x6f, 0x67,
+        0x22, 0x34, 0x0a, 0x12, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65,
+        0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1e, 0x0a, 0x04, 0x62, 0x6c, 0x6f, 0x67, 0x18, 0x01,
+        0x20, 0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x42, 0x6c, 0x6f, 0x67,
+        0x52, 0x04, 0x62, 0x6c, 0x6f, 0x67, 0x22, 0x2c, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
+        0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x62,
+        0x6c, 0x6f, 0x67, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x62, 0x6c,
+        0x6f, 0x67, 0x49, 0x64, 0x22, 0x2c, 0x0a, 0x12, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x42, 0x6c,
+        0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74,
+        0x61, 0x74, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74,
+        0x75, 0x73, 0x32, 0x8b, 0x02, 0x0a, 0x0b, 0x42, 0x6c, 0x6f, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69,
+        0x63, 0x65, 0x12, 0x3f, 0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67,
+        0x12, 0x17, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x42, 0x6c,
+        0x6f, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x62, 0x6c, 0x6f, 0x67,
+        0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f,
+        0x6e, 0x73, 0x65, 0x12, 0x39, 0x0a, 0x08, 0x52, 0x65, 0x61, 0x64, 0x42, 0x6c, 0x6f, 0x67, 0x12,
+        0x15, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x52, 0x65, 0x61, 0x64, 0x42, 0x6c, 0x6f, 0x67, 0x52,
+        0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x52, 0x65,
+        0x61, 0x64, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3f,
+        0x0a, 0x0a, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x12, 0x17, 0x2e, 0x62,
+        0x6c, 0x6f, 0x67, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65,
+        0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x55, 0x70, 0x64,
+        0x61, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+        0x3f, 0x0a, 0x0a, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x12, 0x17, 0x2e,
+        0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52,
+        0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x18, 0x2e, 0x62, 0x6c, 0x6f, 0x67, 0x2e, 0x44, 0x65,
+        0x6c, 0x65, 0x74, 0x65, 0x42, 0x6c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+        0x42, 0x04, 0x5a, 0x02, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+}
+
+var (
+        file_blog_proto_rawDescOnce sync.Once
+        file_blog_proto_rawDescData = file_blog_proto_rawDesc
+)
+
+func file_blog_proto_rawDescGZIP() []byte <span class="cov0" title="0">{
+        file_blog_proto_rawDescOnce.Do(func() </span><span class="cov0" title="0">{
+                file_blog_proto_rawDescData = protoimpl.X.CompressGZIP(file_blog_proto_rawDescData)
+        }</span>)
+        <span class="cov0" title="0">return file_blog_proto_rawDescData</span>
+}
+
+var file_blog_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_blog_proto_goTypes = []interface{}{
+        (*Blog)(nil),               // 0: blog.Blog
+        (*CreateBlogRequest)(nil),  // 1: blog.CreateBlogRequest
+        (*CreateBlogResponse)(nil), // 2: blog.CreateBlogResponse
+        (*ReadBlogRequest)(nil),    // 3: blog.ReadBlogRequest
+        (*ReadBlogResponse)(nil),   // 4: blog.ReadBlogResponse
+        (*UpdateBlogRequest)(nil),  // 5: blog.UpdateBlogRequest
+        (*UpdateBlogResponse)(nil), // 6: blog.UpdateBlogResponse
+        (*DeleteBlogRequest)(nil),  // 7: blog.DeleteBlogRequest
+        (*DeleteBlogResponse)(nil), // 8: blog.DeleteBlogResponse
+}
+var file_blog_proto_depIdxs = []int32{
+        0, // 0: blog.CreateBlogRequest.blog:type_name -&gt; blog.Blog
+        0, // 1: blog.CreateBlogResponse.blog:type_name -&gt; blog.Blog
+        0, // 2: blog.ReadBlogResponse.blog:type_name -&gt; blog.Blog
+        0, // 3: blog.UpdateBlogRequest.blog:type_name -&gt; blog.Blog
+        0, // 4: blog.UpdateBlogResponse.blog:type_name -&gt; blog.Blog
+        1, // 5: blog.BlogService.CreateBlog:input_type -&gt; blog.CreateBlogRequest
+        3, // 6: blog.BlogService.ReadBlog:input_type -&gt; blog.ReadBlogRequest
+        5, // 7: blog.BlogService.UpdateBlog:input_type -&gt; blog.UpdateBlogRequest
+        7, // 8: blog.BlogService.DeleteBlog:input_type -&gt; blog.DeleteBlogRequest
+        2, // 9: blog.BlogService.CreateBlog:output_type -&gt; blog.CreateBlogResponse
+        4, // 10: blog.BlogService.ReadBlog:output_type -&gt; blog.ReadBlogResponse
+        6, // 11: blog.BlogService.UpdateBlog:output_type -&gt; blog.UpdateBlogResponse
+        8, // 12: blog.BlogService.DeleteBlog:output_type -&gt; blog.DeleteBlogResponse
+        9, // [9:13] is the sub-list for method output_type
+        5, // [5:9] is the sub-list for method input_type
+        5, // [5:5] is the sub-list for extension type_name
+        5, // [5:5] is the sub-list for extension extendee
+        0, // [0:5] is the sub-list for field type_name
+}
+
+func init() <span class="cov8" title="1">{ file_blog_proto_init() }</span>
+func file_blog_proto_init() <span class="cov8" title="1">{
+        if File_blog_proto != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov8" title="1">if !protoimpl.UnsafeEnabled </span><span class="cov0" title="0">{
+                file_blog_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*Blog); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*CreateBlogRequest); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*CreateBlogResponse); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*ReadBlogRequest); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*ReadBlogResponse); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*UpdateBlogRequest); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*UpdateBlogResponse); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*DeleteBlogRequest); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+                <span class="cov0" title="0">file_blog_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} </span><span class="cov0" title="0">{
+                        switch v := v.(*DeleteBlogResponse); i </span>{
+                        case 0:<span class="cov0" title="0">
+                                return &amp;v.state</span>
+                        case 1:<span class="cov0" title="0">
+                                return &amp;v.sizeCache</span>
+                        case 2:<span class="cov0" title="0">
+                                return &amp;v.unknownFields</span>
+                        default:<span class="cov0" title="0">
+                                return nil</span>
+                        }
+                }
+        }
+        <span class="cov8" title="1">type x struct{}
+        out := protoimpl.TypeBuilder{
+                File: protoimpl.DescBuilder{
+                        GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
+                        RawDescriptor: file_blog_proto_rawDesc,
+                        NumEnums:      0,
+                        NumMessages:   9,
+                        NumExtensions: 0,
+                        NumServices:   1,
+                },
+                GoTypes:           file_blog_proto_goTypes,
+                DependencyIndexes: file_blog_proto_depIdxs,
+                MessageInfos:      file_blog_proto_msgTypes,
+        }.Build()
+        File_blog_proto = out.File
+        file_blog_proto_rawDesc = nil
+        file_blog_proto_goTypes = nil
+        file_blog_proto_depIdxs = nil</span>
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// BlogServiceClient is the client API for BlogService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type BlogServiceClient interface {
+        CreateBlog(ctx context.Context, in *CreateBlogRequest, opts ...grpc.CallOption) (*CreateBlogResponse, error)
+        ReadBlog(ctx context.Context, in *ReadBlogRequest, opts ...grpc.CallOption) (*ReadBlogResponse, error)
+        UpdateBlog(ctx context.Context, in *UpdateBlogRequest, opts ...grpc.CallOption) (*UpdateBlogResponse, error)
+        DeleteBlog(ctx context.Context, in *DeleteBlogRequest, opts ...grpc.CallOption) (*DeleteBlogResponse, error)
+}
+
+type blogServiceClient struct {
+        cc grpc.ClientConnInterface
+}
+
+func NewBlogServiceClient(cc grpc.ClientConnInterface) BlogServiceClient <span class="cov0" title="0">{
+        return &amp;blogServiceClient{cc}
+}</span>
+
+func (c *blogServiceClient) CreateBlog(ctx context.Context, in *CreateBlogRequest, opts ...grpc.CallOption) (*CreateBlogResponse, error) <span class="cov0" title="0">{
+        out := new(CreateBlogResponse)
+        err := c.cc.Invoke(ctx, "/blog.BlogService/CreateBlog", in, out, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *blogServiceClient) ReadBlog(ctx context.Context, in *ReadBlogRequest, opts ...grpc.CallOption) (*ReadBlogResponse, error) <span class="cov0" title="0">{
+        out := new(ReadBlogResponse)
+        err := c.cc.Invoke(ctx, "/blog.BlogService/ReadBlog", in, out, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *blogServiceClient) UpdateBlog(ctx context.Context, in *UpdateBlogRequest, opts ...grpc.CallOption) (*UpdateBlogResponse, error) <span class="cov0" title="0">{
+        out := new(UpdateBlogResponse)
+        err := c.cc.Invoke(ctx, "/blog.BlogService/UpdateBlog", in, out, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *blogServiceClient) DeleteBlog(ctx context.Context, in *DeleteBlogRequest, opts ...grpc.CallOption) (*DeleteBlogResponse, error) <span class="cov0" title="0">{
+        out := new(DeleteBlogResponse)
+        err := c.cc.Invoke(ctx, "/blog.BlogService/DeleteBlog", in, out, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+// BlogServiceServer is the server API for BlogService service.
+type BlogServiceServer interface {
+        CreateBlog(context.Context, *CreateBlogRequest) (*CreateBlogResponse, error)
+        ReadBlog(context.Context, *ReadBlogRequest) (*ReadBlogResponse, error)
+        UpdateBlog(context.Context, *UpdateBlogRequest) (*UpdateBlogResponse, error)
+        DeleteBlog(context.Context, *DeleteBlogRequest) (*DeleteBlogResponse, error)
+}
+
+// UnimplementedBlogServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedBlogServiceServer struct {
+}
+
+func (*UnimplementedBlogServiceServer) CreateBlog(context.Context, *CreateBlogRequest) (*CreateBlogResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method CreateBlog not implemented")
+}</span>
+func (*UnimplementedBlogServiceServer) ReadBlog(context.Context, *ReadBlogRequest) (*ReadBlogResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method ReadBlog not implemented")
+}</span>
+func (*UnimplementedBlogServiceServer) UpdateBlog(context.Context, *UpdateBlogRequest) (*UpdateBlogResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method UpdateBlog not implemented")
+}</span>
+func (*UnimplementedBlogServiceServer) DeleteBlog(context.Context, *DeleteBlogRequest) (*DeleteBlogResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method DeleteBlog not implemented")
+}</span>
+
+func RegisterBlogServiceServer(s *grpc.Server, srv BlogServiceServer) <span class="cov0" title="0">{
+        s.RegisterService(&amp;_BlogService_serviceDesc, srv)
+}</span>
+
+func _BlogService_CreateBlog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(CreateBlogRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).CreateBlog(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: "/blog.BlogService/CreateBlog",
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).CreateBlog(ctx, req.(*CreateBlogRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _BlogService_ReadBlog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(ReadBlogRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).ReadBlog(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: "/blog.BlogService/ReadBlog",
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).ReadBlog(ctx, req.(*ReadBlogRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _BlogService_UpdateBlog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(UpdateBlogRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).UpdateBlog(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: "/blog.BlogService/UpdateBlog",
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).UpdateBlog(ctx, req.(*UpdateBlogRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _BlogService_DeleteBlog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(DeleteBlogRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).DeleteBlog(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: "/blog.BlogService/DeleteBlog",
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(BlogServiceServer).DeleteBlog(ctx, req.(*DeleteBlogRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+var _BlogService_serviceDesc = grpc.ServiceDesc{
+        ServiceName: "blog.BlogService",
+        HandlerType: (*BlogServiceServer)(nil),
+        Methods: []grpc.MethodDesc{
+                {
+                        MethodName: "CreateBlog",
+                        Handler:    _BlogService_CreateBlog_Handler,
+                },
+                {
+                        MethodName: "ReadBlog",
+                        Handler:    _BlogService_ReadBlog_Handler,
+                },
+                {
+                        MethodName: "UpdateBlog",
+                        Handler:    _BlogService_UpdateBlog_Handler,
+                },
+                {
+                        MethodName: "DeleteBlog",
+                        Handler:    _BlogService_DeleteBlog_Handler,
+                },
+        },
+        Streams:  []grpc.StreamDesc{},
+        Metadata: "blog.proto",
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "net"
+        "os"
+        "os/signal"
+
+        "github.com/tannergabriel/learning-go/beginner-programs/gRPC-CRUD/pb"
+        "go.mongodb.org/mongo-driver/bson"
+        "go.mongodb.org/mongo-driver/bson/primitive"
+        "go.mongodb.org/mongo-driver/mongo"
+        "go.mongodb.org/mongo-driver/mongo/options"
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/codes"
+        "google.golang.org/grpc/reflection"
+        "google.golang.org/grpc/status"
+)
+
+var Collection *mongo.Collection
+
+type BlogItem struct {
+        ID       primitive.ObjectID `bson:"_id,omitempty"`
+        AuthorID string             `bson:"author_id"`
+        Content  string             `bson:"content"`
+        Title    string             `bson:"title"`
+}
+
+type server struct{}
+
+func (*server) CreateBlog(ctx context.Context, request *pb.CreateBlogRequest) (*pb.CreateBlogResponse, error) <span class="cov0" title="0">{
+        r := request.GetBlog()
+
+        data := BlogItem{
+                AuthorID: r.AuthorId,
+                Content:  r.Content,
+                Title:    r.Title,
+        }
+
+        res, err := Collection.InsertOne(ctx, data)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, status.Errorf(codes.Internal, fmt.Sprintf("internal error: %v", err))
+        }</span>
+
+        <span class="cov0" title="0">oid, ok := res.InsertedID.(primitive.ObjectID)
+        if !ok </span><span class="cov0" title="0">{
+                return nil, status.Errorf(codes.Internal, "cannot convert OID")
+        }</span>
+        <span class="cov0" title="0">return &amp;pb.CreateBlogResponse{
+                Blog: &amp;pb.Blog{
+                        Id: oid.Hex(),
+                },
+        }, nil</span>
+}
+
+func (*server) ReadBlog(ctx context.Context, request *pb.ReadBlogRequest) (*pb.ReadBlogResponse, error) <span class="cov0" title="0">{
+        blogID := request.BlogId
+        oid, err := primitive.ObjectIDFromHex(blogID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("cannot parse ID"))
+        }</span>
+
+        <span class="cov0" title="0">d := &amp;BlogItem{}
+        filter := bson.M{
+                "_id": oid,
+        }
+        res := Collection.FindOne(context.Background(), filter)
+        if err := res.Decode(d); err != nil </span><span class="cov0" title="0">{
+                return nil, status.Errorf(codes.NotFound, fmt.Sprintf("document not found"))
+        }</span>
+
+        <span class="cov0" title="0">return &amp;pb.ReadBlogResponse{
+                Blog: &amp;pb.Blog{
+                        Id:       d.ID.Hex(),
+                        AuthorId: d.AuthorID,
+                        Title:    d.Title,
+                        Content:  d.Content,
+                },
+        }, nil</span>
+}
+
+func (*server) UpdateBlog(ctx context.Context, request *pb.UpdateBlogRequest) (*pb.UpdateBlogResponse, error) <span class="cov0" title="0">{
+        blog := request.GetBlog()
+        blogID := request.BlogId
+
+        oid, _ := primitive.ObjectIDFromHex(blogID)
+
+        update := bson.M{
+                "authord_id": blog.GetAuthorId(),
+                "title":      blog.GetTitle(),
+                "content":    blog.GetContent(),
+        }
+
+        filter := bson.M{"_id": oid}
+
+        Collection.FindOneAndUpdate(ctx, filter, bson.M{"$set": update}, options.FindOneAndUpdate().SetReturnDocument(1))
+
+        return &amp;pb.UpdateBlogResponse{
+                Blog: &amp;pb.Blog{
+                        Id:       oid.Hex(),
+                        AuthorId: blog.GetAuthorId(),
+                        Title:    blog.GetTitle(),
+                        Content:  blog.GetContent(),
+                },
+        }, nil
+}</span>
+
+func (*server) DeleteBlog(ctx context.Context, request *pb.DeleteBlogRequest) (*pb.DeleteBlogResponse, error) <span class="cov0" title="0">{
+        oid, err := primitive.ObjectIDFromHex(request.BlogId)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("Could not convert to ObjectId: %v", err))
+        }</span>
+
+        <span class="cov0" title="0">_, err = Collection.DeleteOne(ctx, bson.M{"_id": oid})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, status.Errorf(codes.NotFound, fmt.Sprintf("Could not find/delete blog with id %s: %v", request.BlogId, err))
+        }</span>
+
+        <span class="cov0" title="0">return &amp;pb.DeleteBlogResponse{
+                Status: true,
+        }, nil</span>
+}
+
+func main() <span class="cov0" title="0">{
+        log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+        client, errMongo := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+
+        if errMongo != nil </span><span class="cov0" title="0">{
+                log.Fatalf("failed to create connection: %v", errMongo)
+        }</span>
+
+        <span class="cov0" title="0">errConn := client.Connect(context.TODO())
+
+        if errConn != nil </span><span class="cov0" title="0">{
+                log.Fatalf("failed to connect: %v", errConn)
+        }</span>
+
+        <span class="cov0" title="0">Collection = client.Database("mydb").Collection("blog")
+        listener, errLis := net.Listen("tcp", "localhost:50051")
+
+        if errLis != nil </span><span class="cov0" title="0">{
+                log.Fatalf("failed to listen: %v\n", errLis)
+        }</span>
+
+        <span class="cov0" title="0">opts := []grpc.ServerOption{}
+
+        s := grpc.NewServer(opts...)
+        pb.RegisterBlogServiceServer(s, &amp;server{})
+        reflection.Register(s)
+        go func() </span><span class="cov0" title="0">{
+                fmt.Println("Server started")
+                if err := s.Serve(listener); err != nil </span><span class="cov0" title="0">{
+                        log.Fatalf("failed to serve: %v\n", err)
+                }</span>
+        }()
+
+        <span class="cov0" title="0">ch := make(chan os.Signal, 1)
+        signal.Notify(ch, os.Interrupt)
+
+        &lt;-ch
+        fmt.Println("Stopping server")
+        s.Stop()
+        fmt.Println("Closing the listener")
+        listener.Close()
+        fmt.Println("Closing the MongoDB database connection")
+        client.Disconnect(context.TODO())</span>
+
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
